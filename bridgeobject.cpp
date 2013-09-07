@@ -59,4 +59,32 @@ void bridgeObject::reboot(){
     system("/sbin/reboot -f");
 }
 
+QString bridgeObject::getSerialNumber(){
+    QString serial;
+    QFile file("/proc/cpuinfo");
+
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug() << "Could not open file for reading";
+        serial=QString("Error: File could not open");
+        return serial;
+    }
+    QTextStream in(&file);
+    for (int i=0; i<12; i++) {
+        QString line = in.readLine();
+        QStringList wordLine = line.split(":");
+
+        if(line.contains("Serial")){
+            serial=wordLine.at(1);
+            serial.replace(" ", "");
+            qDebug() << "bridge.serial: " + serial;
+            file.close();
+        }
+        else
+            serial=QString("File not found");
+    }
+    file.close();
+
+    return serial;
+}
+
 

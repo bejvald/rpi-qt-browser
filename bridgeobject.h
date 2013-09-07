@@ -26,6 +26,7 @@ public slots:
     void setPosition(int x, int y, int width, int height);
     void setFullscreen();
     void reboot();
+    QString getSerialNumber();
 
 
 private:
