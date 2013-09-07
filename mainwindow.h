@@ -39,7 +39,6 @@ private:
     QQuickView *mediaView;
     QSettings *mainSettings;
     QKeyEvent * eventExit;
-    QQuickItem *rootObj; //The root-object of the QML-Interface
     bridgeObject *bridge; //The javascript-webkit bridge object
 
     int progress;

@@ -32,7 +32,7 @@ void bridgeObject::mute(bool muteStatus){
 void bridgeObject::open(QString uri){
     QUrl fileName(uri);
     root->setProperty("fileName", fileName);
-    QMetaObject::invokeMethod(root, "play");
+    QMetaObject::invokeMethod(root, "init");
 }
 
 void bridgeObject::play(int speed){

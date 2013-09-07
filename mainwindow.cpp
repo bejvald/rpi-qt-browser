@@ -20,9 +20,8 @@ MainWindow::MainWindow() : QWidget()
     mediaView = new QQuickView(this->windowHandle());
     browserView= new QWebView(this);
 
-    mediaView->setSource(QUrl("qrc:///qml/QML-Browser/videoPlayer.qml"));
-    rootObj = mediaView->rootObject();
-    bridge= new bridgeObject(rootObj);
+    mediaView->setSource(QUrl("qrc:///qml/videoPlayer.qml"));
+    bridge= new bridgeObject(mediaView->rootObject());
 
 
     //Resize views
@@ -103,15 +102,15 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         }
     case Qt::Key_F2:
         qDebug() << "Key F2 was pressed";
-        QMetaObject::invokeMethod(rootObj, "toggleFullScreen");
+        bridge->setFullscreen();
         break;
     case Qt::Key_F3:
         qDebug() << "Key F3 was pressed";
-        QMetaObject::invokeMethod(rootObj, "play");
+        bridge->play(1);
         break;
     case Qt::Key_F4:
         qDebug() << "Key F4 was pressed";
-        QMetaObject::invokeMethod(rootObj, "pause");
+        bridge->pause();
         break;
     case Qt::Key_F5:
         qDebug() << "Key F5 was pressed";
@@ -119,7 +118,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         break;
     case Qt::Key_F11:
         qDebug() << "Key F11 was pressed";
-        QMetaObject::invokeMethod(rootObj, "init");
         break;
 
     }
@@ -142,8 +140,7 @@ void MainWindow::urlChanged(const QUrl &url)
 
         qDebug() << "Url contains mp4!";
         //browserView->stop(); //Seg-faults
-        mediaView->rootObject()->setProperty("fileName", url);
-        QMetaObject::invokeMethod(rootObj, "init");
+        bridge->open(uri);
     }
 }
 void MainWindow::loadStarted()

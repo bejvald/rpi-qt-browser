@@ -89,9 +89,6 @@ Rectangle {
 
     //Hibox API-functions for the MediaPlayer:
 
-    function getVolume(){
-        return content.volume
-    }
     function setVolume(){
         content.volume=targetVolume;
     }
