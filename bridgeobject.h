@@ -18,11 +18,14 @@ public slots:
 
     int getVolume();
     void setVolume(int volume);
+    bool isMuted();
+    void mute(bool m);
     void open(QString uri);
     void play(int speed);
     void pause();
     void setPosition(int x, int y, int width, int height);
     void setFullscreen();
+    void reboot();
 
 
 private:

@@ -10,6 +10,8 @@ Rectangle {
     property int targetWidth
     property int targetHeight
     property real targetVolume
+    property bool muteStatus
+    property int playSpeed
 
     Content {
         id: content
@@ -92,6 +94,9 @@ Rectangle {
     }
     function setVolume(){
         content.volume=targetVolume;
+    }
+    function mute(){
+        Content.mute(muteStatus);
     }
     function play(){
         content.play();

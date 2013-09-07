@@ -123,6 +123,13 @@ Rectangle {
         }
     }
 
+    function mute(value) {
+        console.log("[qml-browser] Content.mute: " + value)
+        if (contentLoader.item) {
+            contentLoader.item.muted=value;
+        }
+    }
+
     function contentItem() { return contentLoader.item }
     function updateRootSize() { root.height = contentItem().height }
 
