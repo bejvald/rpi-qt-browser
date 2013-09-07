@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/Content.qml</file>
+        <file>qml/ContentVideo.qml</file>
+        <file>qml/videoPlayer.qml</file>
+    </qresource>
+</RCC>
