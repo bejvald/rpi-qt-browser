@@ -26,26 +26,14 @@ MainWindow::MainWindow() : QWidget()
     //Resize views
     //TODO: Make these fetch the TV-size
     mediaView->setResizeMode(QQuickView::SizeRootObjectToView);
-    mediaView->resize(1920, 1080);
+    //resize(1280, 720);
+    mediaView->resize(1280, 720);
+    browserView->resize(1280, 720);
 
-    browserView->resize(1920, 1080);
-
-    //Make the background of the mediawindow transparent
-    QSurfaceFormat format;
-    format.setAlphaBufferSize(8);
-    qDebug() << format.hasAlpha();
-    mediaView->setFormat(format);
-
-    QColor color;
-    color.setRedF(0.0);
-    color.setGreenF(0.0);
-    color.setBlueF(0.0);
-    color.setAlphaF(0.0);
-    mediaView->setColor(color);
-    mediaView->setClearBeforeRendering(true);
-
-    //Make the background of the root window transparent
+    //Make the background of the root- and browserwindow transparent
     setAttribute(Qt::WA_TranslucentBackground, true);
+    setStyleSheet("background-color: rgba(0,0,0,1%)");
+    browserView->setAttribute(Qt::WA_TranslucentBackground, true);
 
     //Connect the signals
     connect(browserView, SIGNAL(urlChanged(const QUrl &)), SLOT(urlChanged(const QUrl &)));
@@ -56,7 +44,7 @@ MainWindow::MainWindow() : QWidget()
     browserView->show();
 
     //browserView->setUrl(QUrl("file:///home/pi/test.html"));
-    browserView->setUrl(QUrl("http://10.9.1.121:8080/dlx"));
+    browserView->setUrl(QUrl("http://192.168.211.211:8080/dlx"));
 
 }
 
