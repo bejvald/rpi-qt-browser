@@ -40,3 +40,6 @@ RESOURCES += qmlmedia.qrc
 HEADERS += \
     mainwindow.h \
     bridgeobject.h
+
+OTHER_FILES += \
+    LICENSE.txt

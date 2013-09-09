@@ -24,7 +24,6 @@ public:
 protected slots:
 
     void cleanupSlot();
-
     void urlChanged(const QUrl &);
     void loadStarted();
 
@@ -39,7 +38,7 @@ private:
     QQuickView *mediaView;
     QSettings *mainSettings;
     QKeyEvent * eventExit;
-    bridgeObject *bridge; //The javascript-webkit bridge object
+    bridgeObject *rpi; //The javascript-webkit bridge object
 
     int progress;
     

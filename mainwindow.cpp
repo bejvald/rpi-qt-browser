@@ -13,24 +13,22 @@
 
 MainWindow::MainWindow() : QWidget()
 {
-    //Initiate
-
+    //Initiate views
     progress = 0;
 
     mediaView = new QQuickView(this->windowHandle());
     browserView= new QWebView(this);
 
+    //Set QML and initiate the webkit-bridge
     mediaView->setSource(QUrl("qrc:///qml/videoPlayer.qml"));
-    bridge= new bridgeObject(mediaView->rootObject());
-
+    rpi= new bridgeObject(mediaView->rootObject());
 
     //Resize views
     //TODO: Make these fetch the TV-size
     mediaView->setResizeMode(QQuickView::SizeRootObjectToView);
     mediaView->resize(1920, 1080);
 
-    browserView->resize(800, 600);
-    browserView->move(500, 200);
+    browserView->resize(1920, 1080);
 
     //Make the background of the mediawindow transparent
     QSurfaceFormat format;
@@ -57,7 +55,8 @@ MainWindow::MainWindow() : QWidget()
     mediaView->show();
     browserView->show();
 
-    browserView->setUrl(QUrl("file:///home/pi/test.html"));
+    //browserView->setUrl(QUrl("file:///home/pi/test.html"));
+    browserView->setUrl(QUrl("http://10.9.1.121:8080/dlx"));
 
 }
 
@@ -88,29 +87,29 @@ void MainWindow::centerFixedSizeWindow()
 
     move ( x, y );
     setFixedSize( windowWidth, windowHeight );
-
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
     case Qt::Key_Q:
-        if (int(event->modifiers()) == Qt::CTRL) {
+        if (int(event->modifiers()) == Qt::CTRL)
+        {
             qDebug() << "Key Ctrl+Q was pressed";
             //clearCacheOnExit();
             QApplication::exit(0);
         }
     case Qt::Key_F2:
         qDebug() << "Key F2 was pressed";
-        bridge->setFullscreen();
+        rpi->setFullscreen();
         break;
     case Qt::Key_F3:
         qDebug() << "Key F3 was pressed";
-        bridge->play(1);
+        rpi->play(1);
         break;
     case Qt::Key_F4:
         qDebug() << "Key F4 was pressed";
-        bridge->pause();
+        rpi->pause();
         break;
     case Qt::Key_F5:
         qDebug() << "Key F5 was pressed";
@@ -119,18 +118,15 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_F11:
         qDebug() << "Key F11 was pressed";
         break;
-
     }
 }
 
 void MainWindow::urlChanged(const QUrl &url)
 {
-
     qDebug() << "URL changes: " << url.toString();
 
-    //Add the javascript-webkit-brigdge to each page
     QWebFrame *frame=browserView->page()->mainFrame();
-    frame->addToJavaScriptWindowObject("bridge", bridge);
+    frame->addToJavaScriptWindowObject("rpi", rpi);
 
     //Handle opening of video-links
     QString uri=url.toString();
@@ -140,11 +136,13 @@ void MainWindow::urlChanged(const QUrl &url)
 
         qDebug() << "Url contains mp4!";
         //browserView->stop(); //Seg-faults
-        bridge->open(uri);
+        rpi->open(uri);
     }
 }
+
 void MainWindow::loadStarted()
 {
+    //Adding bridgeobject here doesn't work
     qDebug() << "Load started";
 }
 
