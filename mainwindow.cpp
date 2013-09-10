@@ -39,13 +39,15 @@ MainWindow::MainWindow() : QWidget()
     connect(browserView, SIGNAL(urlChanged(const QUrl &)), SLOT(urlChanged(const QUrl &)));
     connect(browserView, SIGNAL(loadStarted()), SLOT(loadStarted()));
 
+    //homePage=QUrl("file:///home/pi/test.html");
+    homePage=QUrl("http://192.168.211.211:8080/dlx");
+    //homePage=QUrl("http://devcentre.hibox.fi/dlx");
+
     //Show the screens
     mediaView->show();
     browserView->show();
 
-    browserView->setUrl(QUrl("file:///home/pi/test.html"));
-    //browserView->setUrl(QUrl("http://192.168.211.211:8080/dlx"));
-    //browserView->setUrl(QUrl("http://devcentre.hibox.fi/dlx"));
+    //Browser starts loading from main.cpp
 
 }
 
@@ -88,24 +90,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             //clearCacheOnExit();
             QApplication::exit(0);
         }
-    case Qt::Key_F2:
-        qDebug() << "Key F2 was pressed";
-        rpi->setFullscreen();
-        break;
-    case Qt::Key_F3:
-        qDebug() << "Key F3 was pressed";
-        rpi->play(1);
-        break;
-    case Qt::Key_F4:
-        qDebug() << "Key F4 was pressed";
-        rpi->pause();
-        break;
     case Qt::Key_F5:
         qDebug() << "Key F5 was pressed";
         browserView->reload();
-        break;
-    case Qt::Key_F11:
-        qDebug() << "Key F11 was pressed";
         break;
     }
 }
@@ -133,6 +120,12 @@ void MainWindow::loadStarted()
 {
     //Adding bridgeobject here doesn't work
     qDebug() << "Load started";
+}
+void MainWindow::loadUrl(QUrl url)
+{
+    //Adding bridgeobject here doesn't work
+    qDebug() << "Loading Url: " + url.toString();
+    browserView->setUrl(url);
 }
 
 void MainWindow::cleanupSlot()

@@ -9,6 +9,7 @@
 #include <qquickview.h>
 #include <QWebView>
 #include <bridgeobject.h>
+#include <QUrl>
 
 
 class MainWindow : public QWidget
@@ -20,6 +21,9 @@ public:
     explicit MainWindow();
 
     void keyPressEvent(QKeyEvent *event);
+
+    QUrl homePage;
+    void loadUrl(QUrl url);
     
 protected slots:
 
@@ -30,7 +34,6 @@ protected slots:
 protected:
 
     void centerFixedSizeWindow();
-
 
 private:
 

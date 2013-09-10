@@ -41,8 +41,26 @@ int main(int argc, char *argv[])
     QObject::connect(qApp,          SIGNAL(aboutToQuit()),
                      browser,   SLOT(cleanupSlot()));
 
+    QStringList args = app.arguments();
+
+    //Set default homepage
+    QUrl uri=browser->homePage;
+
+    //Check if an URL is provided as parameter
+    if (args.size() > 1) {
+        uri= QUrl(args.at(1));
+        if(uri.toString().contains("http://"))
+        {
+            browser->homePage=uri;
+        }
+        else
+        {
+            qWarning("Not a valid URL. Did you forget 'http://' ?");
+        }
+    }
+    //Start loading the page, resize and show the window
+    browser->loadUrl(uri);
     browser->resize(1280, 720);
-    browser->move(320, 180);
     browser->show();
 
     return app.exec();
