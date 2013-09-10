@@ -173,19 +173,21 @@ void bridgeObject::pause()
 
 void bridgeObject::setPosition(int x, int y, int width, int height)
 {
-    root->setProperty("targetX", x);
-    root->setProperty("targetY", y);
-    root->setProperty("targetWidth", width);
-    root->setProperty("targetHeight", height);
+    qDebug() << "bridge.setPosition";
+    root->setProperty("tX", x);
+    root->setProperty("tY", y);
+    root->setProperty("tWidth", width);
+    root->setProperty("tHeight", height);
     QMetaObject::invokeMethod(root, "setTargetPosition");
 }
 
 void bridgeObject::setFullscreen()
 {
-    root->setProperty("targetX", 0);
-    root->setProperty("targetY", 0);
-    root->setProperty("targetWidth", root->width());
-    root->setProperty("targetHeight", root->height());
+    qDebug() << "bridge.setFullScreen";
+    root->setProperty("tX", 0);
+    root->setProperty("tY", 0);
+    root->setProperty("tWidth", root->width());
+    root->setProperty("tHeight", root->height());
     QMetaObject::invokeMethod(root, "setTargetPosition");
 }
 

@@ -26,7 +26,7 @@ MainWindow::MainWindow() : QWidget()
     //Resize views
     //TODO: Make these fetch the TV-size
     mediaView->setResizeMode(QQuickView::SizeRootObjectToView);
-    //resize(1280, 720);
+
     mediaView->resize(1280, 720);
     browserView->resize(1280, 720);
 
@@ -39,19 +39,73 @@ MainWindow::MainWindow() : QWidget()
     connect(browserView, SIGNAL(urlChanged(const QUrl &)), SLOT(urlChanged(const QUrl &)));
     connect(browserView, SIGNAL(loadStarted()), SLOT(loadStarted()));
 
-    //homePage=QUrl("file:///home/pi/test.html");
-    homePage=QUrl("http://192.168.211.211:8080/dlx");
-    //homePage=QUrl("http://devcentre.hibox.fi/dlx");
+    homePage=QUrl("http://devcentre.hibox.fi/dlx");
 
     //Show the screens
     mediaView->show();
     browserView->show();
 
-    //Browser starts loading from main.cpp
+    //Url-loading triggered from main.cpp
 
 }
 
 //WebView implementations
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key()) {
+    case Qt::Key_Q:
+        if (int(event->modifiers()) == Qt::CTRL)
+        {
+            qDebug() << "Key Ctrl+Q was pressed";
+            //clearCacheOnExit();
+            QApplication::exit(0);
+        }
+    case Qt::Key_F5:
+        qDebug() << "Key F5 was pressed";
+        browserView->reload();
+        break;
+    }
+}
+
+void MainWindow::loadUrl(QUrl url)
+{
+    //Adding bridgeobject here doesn't work
+    qDebug() << "Loading Url: " + url.toString();
+    browserView->setUrl(url);
+}
+
+void MainWindow::cleanupSlot()
+{
+    qDebug() << "Cleanup Slot (application exit)";
+    //clearCacheOnExit();
+    QWebSettings::clearMemoryCaches();
+}
+
+void MainWindow::urlChanged(const QUrl &url)
+{
+    qDebug() << "URL changes: " << url.toString();
+
+    QWebFrame *frame=browserView->page()->mainFrame();
+    frame->addToJavaScriptWindowObject("rpi", rpi);
+
+    //Handle opening of video-links
+    QString uri=url.toString();
+
+    if(uri.contains(".mp4") ||
+       uri.contains(".avi")){
+
+        qDebug() << "Url contains mp4!";
+        //browserView->stop(); //Seg-faults
+        rpi->open(uri);
+    }
+}
+
+void MainWindow::loadStarted()
+{
+    //Adding bridgeobject here doesn't work
+    qDebug() << "Load started";
+}
 
 void MainWindow::centerFixedSizeWindow()
 {
@@ -80,57 +134,3 @@ void MainWindow::centerFixedSizeWindow()
     setFixedSize( windowWidth, windowHeight );
 }
 
-void MainWindow::keyPressEvent(QKeyEvent *event)
-{
-    switch (event->key()) {
-    case Qt::Key_Q:
-        if (int(event->modifiers()) == Qt::CTRL)
-        {
-            qDebug() << "Key Ctrl+Q was pressed";
-            //clearCacheOnExit();
-            QApplication::exit(0);
-        }
-    case Qt::Key_F5:
-        qDebug() << "Key F5 was pressed";
-        browserView->reload();
-        break;
-    }
-}
-
-void MainWindow::urlChanged(const QUrl &url)
-{
-    qDebug() << "URL changes: " << url.toString();
-
-    QWebFrame *frame=browserView->page()->mainFrame();
-    frame->addToJavaScriptWindowObject("rpi", rpi);
-
-    //Handle opening of video-links
-    QString uri=url.toString();
-
-    if(uri.contains(".mp4") ||
-       uri.contains(".avi")){
-
-        qDebug() << "Url contains mp4!";
-        //browserView->stop(); //Seg-faults
-        rpi->open(uri);
-    }
-}
-
-void MainWindow::loadStarted()
-{
-    //Adding bridgeobject here doesn't work
-    qDebug() << "Load started";
-}
-void MainWindow::loadUrl(QUrl url)
-{
-    //Adding bridgeobject here doesn't work
-    qDebug() << "Loading Url: " + url.toString();
-    browserView->setUrl(url);
-}
-
-void MainWindow::cleanupSlot()
-{
-    qDebug() << "Cleanup Slot (application exit)";
-    //clearCacheOnExit();
-    QWebSettings::clearMemoryCaches();
-}
