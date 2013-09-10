@@ -48,6 +48,7 @@ Rectangle {
     property real volume: 0.5
     property bool autoStart: true
     property bool started: false
+    property bool initiated: false
 
 
     Loader {
@@ -70,14 +71,18 @@ Rectangle {
 
     function initVideo(path){
         console.log("[qml-browser] Content.initVideo \"" + path + "\"")
-        stop()
-        contentLoader.source = "ContentVideo.qml"
-        contentLoader.item.mediaSource = path
-        contentLoader.item.volume = volume
-        if (root.autoStart){
-            root.start()
-            root.started = true
+        if(!initiated){
+            stop()
+            contentLoader.source = "ContentVideo.qml"
+            contentLoader.item.mediaSource = path
+            contentLoader.item.volume = volume
+            if (root.autoStart){
+                root.start()
+                root.started = true
+            }
+            initiated=true;
         }
+        play();
     }
 
     function openVideo(path) {

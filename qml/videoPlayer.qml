@@ -5,10 +5,10 @@ Rectangle {
     color: "transparent"
 
     property string fileName
-    property int targetX
-    property int targetY
-    property int targetWidth
-    property int targetHeight
+    property int tX
+    property int tY
+    property int tWidth
+    property int tHeight
     property real targetVolume
     property bool muteStatus
     property int playSpeed
@@ -19,44 +19,6 @@ Rectangle {
         y: 0
         width: 1280
         height: 720
-        state: "left"
-
-        states: [
-            State {
-                name: "fullScreen"
-                PropertyChanges { target: content; x:  parent.x  }
-                PropertyChanges { target: content; y:  parent.y  }
-                PropertyChanges { target: content; width:  parent.width  }
-                PropertyChanges { target: content; height: parent.height }
-            }
-        ]
-
-        transitions: [
-            Transition {
-                ParallelAnimation {
-                    PropertyAnimation {
-                        property: "width"
-                        easing.type: Easing.Linear
-                        duration: 250
-                    }
-                    PropertyAnimation {
-                        property: "height"
-                        easing.type: Easing.Linear
-                        duration: 250
-                    }
-                    PropertyAnimation {
-                        property: "x"
-                        easing.type: Easing.Linear
-                        duration: 250
-                    }
-                    PropertyAnimation {
-                        property: "y"
-                        easing.type: Easing.Linear
-                        duration: 250
-                    }
-                }
-            }
-        ]
     }
 
     Keys.onPressed: {
@@ -75,17 +37,6 @@ Rectangle {
     function setSource(source){
         fileName=source
     }
-    function toggleFullScreen(){
-        if (content.state != "fullScreen"){
-            console.log("[qml-browser] changed to fullScreen");
-            content.state="fullScreen";
-        }
-        else{
-            console.log("[qml-browser] changed to baseState");
-            content.state="baseState";
-        }
-    }
-
 
     //Hibox API-functions for the MediaPlayer:
 
@@ -102,12 +53,11 @@ Rectangle {
         content.pause();
     }
     function setTargetPosition(){
-        content.x=targetX;
-        content.y=targetY;
-        content.height=targetHeight;
-        content.width=targetWidth;
-    }
-    function setFullscreen(){
-        content.state="fullScreen";
+        console.log("videoPlayer.setTargetPosition: "
+                    + tX + " " + tY + " " + tHeight + " " + tWidth);
+        content.x=tX;
+        content.y=tY;
+        content.height=tHeight;
+        content.width=tWidth;
     }
 }

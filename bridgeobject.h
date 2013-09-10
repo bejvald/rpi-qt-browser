@@ -18,6 +18,7 @@ public slots:
 
     //General device functions
     QString getSerialNumber();
+    QString getMacAddress();
     QString getDisplayMode();
     void setDisplayMode(QString displaymode, int storagemode);
     QString getFirstAudioLanguage();
@@ -45,13 +46,9 @@ public slots:
     void setPosition(int x, int y, int width, int height);
     void setFullscreen();
 
-
-
-
 private:
 
     QQuickItem *root;
-
 
 };
 

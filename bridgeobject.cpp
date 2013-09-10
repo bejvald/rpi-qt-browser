@@ -40,6 +40,23 @@ QString bridgeObject::getSerialNumber()
     return serial;
 }
 
+QString bridgeObject::getMacAddress()
+{
+    QString address;
+    QFile file("/sys/class/net/eth0/address");
+
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug() << "Could not open file for reading";
+        address=QString("Error: Could not open file");
+        return address;
+    }
+
+    QTextStream in(&file);
+    address=in.readLine();
+    qDebug() << "bridge.macaddress: " + address;
+    return address;
+}
+
 QString bridgeObject::getDisplayMode()
 {
     //Dummy function
@@ -165,7 +182,11 @@ void bridgeObject::setPosition(int x, int y, int width, int height)
 
 void bridgeObject::setFullscreen()
 {
-    QMetaObject::invokeMethod(root, "setFullscreen");
+    root->setProperty("targetX", 0);
+    root->setProperty("targetY", 0);
+    root->setProperty("targetWidth", root->width());
+    root->setProperty("targetHeight", root->height());
+    QMetaObject::invokeMethod(root, "setTargetPosition");
 }
 
 

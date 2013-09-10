@@ -43,8 +43,9 @@ MainWindow::MainWindow() : QWidget()
     mediaView->show();
     browserView->show();
 
-    //browserView->setUrl(QUrl("file:///home/pi/test.html"));
-    browserView->setUrl(QUrl("http://192.168.211.211:8080/dlx"));
+    browserView->setUrl(QUrl("file:///home/pi/test.html"));
+    //browserView->setUrl(QUrl("http://192.168.211.211:8080/dlx"));
+    //browserView->setUrl(QUrl("http://devcentre.hibox.fi/dlx"));
 
 }
 
