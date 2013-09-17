@@ -1,0 +1,267 @@
+How to compile the QT-libraries for Raspberry Pi. 
+
+This guide is a compilation of different other qt-compilation guides found on the web.
+This is tested for Qt 5.1.
+
+
+1.Download the latest available wheezy image from the Raspberry Pi website: http://www.raspberrypi.org/downloads.
+
+
+2.Uncompress the image and flash it to your SD card. I will place all RPi-Qt-related in the folder ~/opt/ 
+
+(replace /dev/sdb with the appropriate device and be VERY CAREFUL! Use the "Disks" app in Ubuntu or "Disk Utility" in OSX, in my case the default was /dev/sdb):
+
+you@desktop:~/opt$ sudo dd bs=1M if=raspbian.img of=/dev/sdb; sync
+
+
+3.Boot the new image on your board.
+
+
+4.Install some libs that we will need (these should be installed on the RPi):
+
+$ sudo apt-get install libdbus-1-dev libudev-dev libssl-dev
+$ sudo apt-get install libasound2-dev
+$ sudo apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libgstreamer-plugins-bad0.10-dev
+$ sudo apt-get install libffi-dev libpixman-1-dev
+$ sudo apt-get install libsqlite3-dev libicu-dev libfontconfig1-dev
+
+libdbus-1-dev is used to get the QtDBus module compiled from qtbase, libudev-dev to get udev support, libssl-dev for OpenSSL and libasound2-dev will provide Qt what it needs for ALSA support.
+GStreamer libs instead are mainly used in the qtmultimedia and qtwebkit modules. If the environment is setup correctly for gstreamer support, then the configure script will report the success.
+libffi-dev libpixman-1-dev are needed to compile the qtwayland module or its dependencies. libsqlite3-dev libicu-dev and libfontconfig1-dev instead are needed only if you intend to use QtWebKit.
+
+
+
+5.Back on the desktop, create an image of the SD card (replace sd_device with sdb or sdc etc.):
+
+you@desktop:~/opt$ sudo dd if=/dev/**sd_device** of=raspbian_with_extras.img
+
+
+
+6.Now mount the image.
+
+you@desktop:~/opt$ sudo mkdir /mnt/rasp-pi-rootfs
+you@desktop:~/opt$ sudo mount -o loop,offset=62914560 raspbian_with_extras.img /mnt/rasp-pi-rootfs
+
+
+7.Download the ARM cross-compiler G++ toolchain which has been - extremely helpfully - built by Donald:
+
+you@desktop:~/opt$ wget http://blueocean.qmh-project.org/gcc-4.7-linaro-rpi-gnueabihf.tbz 
+you@desktop:~/opt$ tar -xf gcc-4.7-linaro-rpi-gnueabihf.tbz
+
+Clone the cross-compile-tools repository (sudo apt-get install git if you haven't already).
+
+you@desktop:~/opt$ git clone git://gitorious.org/cross-compile-tools/cross-compile-tools.git
+
+Finally we need to execute a script to fix symlinks and library paths in the toolchain:
+
+you@desktop:~$ cd ~/opt/cross-compile-tools
+you@desktop:~/opt/cross-compile-tools$ sudo ./fixQualifiedLibraryPaths /mnt/rasp-pi-rootfs/ ~/opt/gcc-4.7-linaro-rpi-gnueabihf/bin/arm-linux-gnueabihf-gcc
+
+
+
+8.You'll also need some instruments on the compilation system: if you're running Kubuntu or Ubuntu, you'll need these packages, otherwise use the instruments provided by your distribution:
+
+sudo apt-get install build-essential perl python git ia32-libs
+
+Also, if you intent to also compile QtWebKit, you'll need additional packages:
+
+sudo apt-get install flex bison gperf libicu-dev libxslt-dev ruby
+
+
+NOTE: If you're compiling in a virtual environment, like I am, beware that QtWebKit compilation will require more than 512MB of RAM! I spent half a day trying to recompile a new toolchain because of "internal compiler error". At least 1GB of RAM should be reserved, but 2GB might be better for QtWebKit.
+
+
+
+9.Clone and initialise the Qt5 repository:
+
+you@desktop:~/opt$ git clone git://gitorious.org/qt/qt5.git
+you@desktop:~/opt$ cd qt5
+you@desktop:~/opt/qt5$ ./init-repository
+
+Qt5 is a huge download so at this point I strongly recommend you make a backup of it in its clean state. You'll almost certainly run into issues and have to start the Qt compile from scratch again.
+
+you@desktop:~/opt$ cp -r qt5 qt5_clean
+
+
+10.Configure QtBase
+
+you@desktop:~/opt/qt5/qtbase$ ./configure -prefix /usr/local/qt5pi -release -device linux-rasp-pi-g++ -make libs -device-option CROSS_COMPILE=~/opt/gcc-4.7-linaro-rpi-gnueabihf/bin/arm-linux-gnueabihf- -device-option DISTRO=wheezy -sysroot /mnt/rasp-pi-rootfs -opensource -confirm-license -no-pch -make examples -nomake tests
+
+The configure should build qmake and eventually output some information about the Qt configuration.
+
+
+now at this point if you've followed this guide, things should look like this:
+
+
+your sysroot (the mounted image) = /mnt/rasp-pi-rootfs
+
+your qt prefix (where the qt-libs are located) = /usr/local/qt5pi
+
+your toolchain path (the arm-cross-compiler) = ~/opt/gcc-4.7-linaro-rpi-gnueabihf
+
+your qt sources (to be compiled) = ~/opt/qt5
+
+
+11.Now make and install qtbase (and qmake). You can use the parameter make -j(number_of_cpus + 1). In my case with a poor core duo:
+
+you@desktop:~/opt/qt5/qtbase$ make -j3
+
+This is the time where you might want to have a coffee.
+
+you@desktop:~/opt/qt5/qtbase$ sudo make install
+
+
+
+12.Compiling the rest of Qt
+
+Now we can configure the rest of Qt. This will take pretty long (about 2h on my core duo, QtWebkit being the slowest).
+
+you@desktop:~/opt/qt5/qtbase$ cd ..
+you@desktop:~/opt/qt5$ /usr/local/qt5pi/bin/qmake .
+you@desktop:~/opt/qt5$ sudo make -j(number_of_cpus + 1)
+you@desktop:~/opt/qt5$ sudo make install
+
+Wait, sudo make? That's surely not right? Well unfortunately there is another bug, where make tries to install /mnt/rasp-pi-rootfs/usr/local/qt5pi/bin/pixeltool and obviously can't since the image needs root-privilegies to be accessed. The easiest way around is to do make as root. Afterwards you can chown back all the files if you want.
+
+If you have problems with dependencies then try compiling the moudles in the following order:
+
+compilation order:
+qtimageformats, qtsvg, qtjsbackend, qtscript, qtxmlpatterns, qtdeclarative, qtsensors, qt3d, qtgraphicaleffects, qtjsondb, qtlocation, qtdocgallery
+
+Otherwise you can just try running make and make install a couple of times until the dependencies between the modules solve themselves.
+
+
+
+13. Installing the hardware-video multimedia-plugin. 
+
+Details about the plugin can be found here: http://thebugfreeblog.blogspot.it/2013/04/hardware-accelerated-qtmultimedia.html
+
+First clone the repo:
+
+you@desktop:~/opt$ git clone git://github.com/carlonluca/pi
+
+Compile the special FFMPEG-libs:
+
+you@desktop:~/opt$ cd pi/tools
+you@desktop:~/opt/pi/tools$ ./compile_ffmpeg.sh (number of cores)
+
+Patch the current multimedia-module:
+
+you@desktop:~/opt/pi/tools$ cp qt_multimedia_patch.patch ../../qt5/qtmultimedia/
+you@desktop:~/opt/pi/tools$ cd ../../qt5/qtmultimedia
+you@desktop:~/opt/qt5/qtmultimedia$ patch -p1 < qt_multimedia_patch.patch
+
+Now go back and compile the rest of the plugin:
+
+you@desktop:~/opt/qt5/qtmultimedia$ cd ../../pi/tools
+you@desktop:~/opt/pi/tools$ ./prepare_openmaxil_backend.sh (number of cores)
+
+When asked, give the absolute path to qmake, if you've followed this guide: /usr/local/qt5pi/bin/qmake
+
+This will compile PiOmxTextures as a shared lib and will place everything you need in the openmaxil_backend directory.
+
+14.Copy the above mentioned openmaxil_backend directory recursively into your Qt source tree in qt_source_tree/qtmultimedia/src/plugins naming it simply openmaxil.
+
+
+15.Copy the Qt libraries that are built to your Pi, together with libPiOmxTextures.so (unless you build it statically) and the ffmpeg libraries. You should not use the ffmpeg libs you have in your Pi, it is likely those won't work; use those compiled by the compile_ffmpeg.sh script in tools. The plugin is pointed to these specially compiled ffmpeg-libraries automatically in later versions. Keep following the instructions.
+
+Copy the contents of pi/openmaxil_backend/3rdparty/ffmpeg/include and pi/openmaxil_backend/3rdparty/PiOmxTextures/include to /mnt/rasp-pi-rootfs/usr/include (or /mnt/rasp-pi-rootfs/usr/local/include or /mnt/rasp-pi-rootfs/usr/local/qt5pi/include, I never figured out which one is "correct" so I just put them in all). The same goes for the /lib folders. I.e: copy the contents of pi/openmaxil_backend/3rdparty/ffmpeg/lib and pi/openmaxil_backend/3rdparty/PiOmxTextures/lib to /mnt/rasp-pi-rootfs/usr/lib (or the other mentioned folders).
+
+Now the plugin should be installed and the Qt-mediaplayer should automatically be playing hardware-accelerated video.
+
+
+
+16.Return the SD card to the Pi
+
+Now we're going to return the SD card to the Pi, but we also need the host machine to have access to its contents so we will keep the image mount. Unmount the SD image:
+
+you@desktop:~/opt$ sync; sudo umount /mnt/rasp-pi-rootfs
+
+And write the image to the SD card again (as before). Then remount it (possibly we didn't need to unmount it, but better to be safe than sorry!):
+
+you@desktop:~/opt$ sudo mount -o loop,offset=62914560 raspbian.img /mnt/rasp-pi-rootfs
+
+Boot up your Pi with the SD card image. Now we're done with the Pi, we just need to set up QtCreator and a project.
+
+
+
+17.Configuring QtCreator
+
+To use QtCreator properly, you must tell it about three things:
+
+    The ARM cross-compiler.
+    The cross-compiled version of Qt.
+    The Raspberry Pi device (for easy deployment).
+
+During compilation you'll need to have the rpi-image mounted the whole time, as QtCreator gets the Qt-libs for building from there. In case you install some other libraries such as the Qt-Video-plugin described later you'll need to have those libraries both on the image and on the pi itself.
+
+Compiler Settings
+
+    Go to Tools -> Options... -> Build & Run -> Compilers
+    Click Add -> GCC
+    Set Compiler Path to ~/opt/gcc-4.7-linaro-rpi-gnueabihf/bin/arm-linux-gnueabihf-g++. Replace ~ with your home path.
+    Set the name to "ARM GCC" (or whatever).
+
+Qt Version settings
+
+    Go to Tools -> Options... -> Build & Run -> Qt Versions
+    Click Add... and choose /usr/local/qt5pi/bin/qmake
+
+Raspberry Pi Device
+
+    Go to Tools -> Options... -> Devices
+    Add a new "Generic Linux Device"
+    Set the IP/hostname to the address of your device.
+    The username is pi
+    The default password is raspberry
+
+Now you are ready to set up your first Qt5 Raspberry Pi project!
+
+
+
+Note for OSX
+
+Because /usr is not visible by default, you first need to open a terminal and type:
+
+sudo SetFile -a v /usr
+
+After you've completed the qmake selection, if you wish to make /usr invisible again, type the same command with a capital V:
+
+sudo SetFile -a V /usr
+
+
+
+18.Project Setup
+
+    Create a new project - "Qt Quick 2 Application (Built-in Elements)". Alternatively you can open an existing project.
+    Go to the Projects pane.
+    Click Manage Kits and then Add.
+
+Fill in the following details
+
+Name: Raspberry Pi
+Device Type: Generic Linux Device
+Device: Raspberry Pi
+Compiler: ARM GCC
+Debugger -> Manage -> Edit -> 
+          ~/opt/gcc-4.7-linaro-rpi-gnueabihf/bin/arm-linux-gnueabihf-gdb
+Qt version: Qt 5.x.x (qt5pi)
+
+Click Ok and then Add Kit -> Raspberry Pi
+
+
+
+19.When you've created your project:
+
+Go to the project panel and click the "Rasperry Pi" kit tab. Under "System Environment" you can add LD_LIBRARY_PATH and set it appropriately. It is a colon-separated list of paths. This sets QtCreator to find the libraries int the image. Sometimes this seems to work by default though.
+
+
+20. All done!
+
+
+
+
+
+
+
+
