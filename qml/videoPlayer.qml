@@ -36,6 +36,9 @@ Rectangle {
     property bool muteStatus
     property int playSpeed
 
+    //Create room for the content, in the end containing the mediaplayer.
+    //Creating the player in three qml-levels was the only way it displayed correctly.
+
     Content {
         id: content
         x: 0
@@ -44,19 +47,20 @@ Rectangle {
         height: 720
     }
 
+    //These are the functions to be accessed from bridgeobject.h
+
     function init() {
         console.log("[videoPlayer] main.init")
         if (fileName != "")
         {
+            //Start playing whatever fileName is set to
             content.initVideo(fileName)
         }
     }
+
     function setSource(source){
         fileName=source
     }
-
-    //Hibox API-functions for the MediaPlayer:
-
     function setVolume(){
         content.volume=targetVolume;
     }

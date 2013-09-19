@@ -39,6 +39,7 @@ Rectangle {
         height: parent.height
     }
 
+    //Starts playing the video at the supplied path
     function initVideo(path){
         console.log("[qml-browser] Content.initVideo \"" + path + "\"")
         if(!initiated){
@@ -55,6 +56,7 @@ Rectangle {
         play();
     }
 
+    //Essentially the same as init. Maybe should be removed.
     function openVideo(path) {
         console.log("[qml-browser] Content.openVideo \"" + path + "\"")
         stop()
@@ -65,6 +67,7 @@ Rectangle {
         root.started = true
     }
 
+    //Send stop-signal to the mediaplayer.
     function stop() {
         console.log("[qml-browser] Content.stop")
         if (contentLoader.item) {
@@ -73,6 +76,8 @@ Rectangle {
         }
     }
 
+    //Start playing whatever video is loaded in to the mediaplayer.
+    //use this if autostart is disabled.
     function start() {
         console.log("[qml-browser] Content.start")
         if (contentLoader.item) {
@@ -82,6 +87,8 @@ Rectangle {
             }
         }
     }
+
+    //Send play-signal to the mediaplayer
     function play() {
         console.log("[qml-browser] Content.play")
         if (contentLoader.item) {
@@ -90,6 +97,7 @@ Rectangle {
         }
     }
 
+    //Send pause-signal to the mediaplayer
     function pause() {
         console.log("[qml-browser] Content.pause")
         if (contentLoader.item) {
@@ -98,6 +106,7 @@ Rectangle {
         }
     }
 
+    //Mute the mediaplayer. This must be supported by the multimedia-plugin.
     function mute(value) {
         console.log("[qml-browser] Content.mute: " + value)
         if (contentLoader.item) {

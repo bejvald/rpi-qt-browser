@@ -42,4 +42,5 @@ HEADERS += \
     bridgeobject.h
 
 OTHER_FILES += \
-    LICENSE.txt
+    LICENSE.txt \
+    README.md

@@ -25,12 +25,19 @@
 #include <QQuickItem>
 #include <QMetaObject>
 
+/*
+ * Creates the object that is to be added to every site for access from javascript.
+ * All methods can be accessed from javascript through objectName.function()
+ *
+ */
 bridgeObject::bridgeObject(QQuickItem *parent) : QObject()
 {
     root=parent;
 }
-//Hibox API
 
+/*
+ * Return {String} the serial number
+ */
 QString bridgeObject::getSerialNumber()
 {
     QString serial;
@@ -63,6 +70,9 @@ QString bridgeObject::getSerialNumber()
     return serial;
 }
 
+/*
+ * Return {String} the network interface MAC address
+ */
 QString bridgeObject::getMacAddress()
 {
     QString address;
@@ -80,12 +90,25 @@ QString bridgeObject::getMacAddress()
     return address;
 }
 
+/*
+ * Return {String} the mode used for the display connected to the device,
+ * for example "576p@50" or "1080i@60"
+ */
 QString bridgeObject::getDisplayMode()
 {
     //Dummy function
     return QString("");
 }
 
+/*
+ * Sets the mode used for the display connected to the device. The mode
+ * specifies resolution, progressive or interlaced display and vertical
+ * refresh interval.
+ *
+ * @param {String} displayMode the display mode as a string (e.g. "576p@50", "1080i@60")
+ * @param {Integer} storageMode how to store the setting (0 for permanent, 1
+ *     for volatile, defaults to permanent).
+ */
 void bridgeObject::setDisplayMode(QString displaymode, int storagemode)
 {
     //Dummy function
@@ -135,12 +158,20 @@ void bridgeObject::setSecondSubtitleLanguage(QString lang, int storagemode)
     //Dummy function
 }
 
+/*
+ * Return {Integer} the audio volume (as percentage of max volume)
+ */
 int bridgeObject::getVolume()
 {
     float vol=root->property("targetVolume").toFloat();
     return int(vol*100);
 }
 
+/*
+ * Sets the audio volume.
+ *
+ * @param {Integer} audio volume (as percentage of max volume)
+ */
 void bridgeObject::setVolume(int volume)
 {
     float targetVolume=volume/100.0;
@@ -148,11 +179,19 @@ void bridgeObject::setVolume(int volume)
     QMetaObject::invokeMethod(root, "setVolume");
 }
 
+/*
+ * Return {Boolean} true if audio is muted, false otherwise, undefined if not known
+ */
 bool bridgeObject::isMuted()
 {
     return root->property("muteStatus").toBool();
 }
 
+/*
+ * Mute or unmute the system.
+ *
+ * @param {Boolean} muteEnabled if true, mute system, otherwise unmute system
+ */
 void bridgeObject::mute(bool muteStatus)
 {
     root->setProperty("muteStatus", muteStatus);
@@ -170,11 +209,20 @@ void bridgeObject::setStandbyState(bool standby)
     //Dummy function
 }
 
+/*
+ * Reboots the device.
+ */
 void bridgeObject::reboot()
 {
     system("/sbin/reboot -f");
 }
 
+/*
+ * Starts playback of a specified URI at speed 1. Can only be called when the media player
+ * is currently closed.
+ *
+ * @param {String} uri the stream URI
+ */
 void bridgeObject::open(QString uri)
 {
     QUrl fileName(uri);
@@ -182,18 +230,34 @@ void bridgeObject::open(QString uri)
     QMetaObject::invokeMethod(root, "init");
 }
 
+/*
+ * Plays the current stream at the specified speed. Supported speeds are 0 (paused), 1
+ * (regular playback) and any trick play speeds supported for the current stream.
+ *
+ * @param speed the playback speed
+ */
 void bridgeObject::play(int speed)
 {
-    //Dummy function, not implemented in QML
+    //Speed is not yet implemented in QML
     root->setProperty("playSpeed", speed);
     QMetaObject::invokeMethod(root, "play");
 }
 
+/*
+ *Pauses the current stream.
+ */
 void bridgeObject::pause()
 {
     QMetaObject::invokeMethod(root, "pause");
 }
 
+/*
+ * Sets the position and dimensions of the video window in browser coordinates.
+ * @param {Integer} x the x coordinate of the window
+ * @param {Integer} y the y coordinate of the window
+ * @param {Integer} width the width of the window
+ * @param {Integer} height the height of the window
+ */
 void bridgeObject::setPosition(int x, int y, int width, int height)
 {
     qDebug() << "bridge.setPosition";
@@ -204,6 +268,9 @@ void bridgeObject::setPosition(int x, int y, int width, int height)
     QMetaObject::invokeMethod(root, "setTargetPosition");
 }
 
+/*
+ * Sets the position and size of the window to cover the entire screen.
+ */
 void bridgeObject::setFullscreen()
 {
     qDebug() << "bridge.setFullScreen";

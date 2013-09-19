@@ -31,6 +31,8 @@ VideoOutput {
 
     fillMode: VideoOutput.Stretch
 
+    //Create the unique mediaplayer
+
     MediaPlayer {
         id: mediaPlayer
         autoPlay: true

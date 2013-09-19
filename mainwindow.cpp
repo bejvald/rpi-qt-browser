@@ -63,7 +63,7 @@ MainWindow::MainWindow() : QWidget()
     connect(browserView, SIGNAL(urlChanged(const QUrl &)), SLOT(urlChanged(const QUrl &)));
     connect(browserView, SIGNAL(loadStarted()), SLOT(loadStarted()));
 
-    homePage=QUrl("http://192.168.212.1/dlx");
+    homePage=QUrl("http://devcentre.hibox.fi/dlx");
 
     //Show the screens
     mediaView->show();
